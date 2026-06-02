@@ -5,7 +5,6 @@ pip install "python-jose[cryptography]" "passlib[bcrypt]"
 4. Guardar en requirements " pip freeze > requirements.txt "
 5. Ejecutar " uvicorn app.main:app --reload "
 
-cd "c:\Users\ASUS\Pictures\Michael\Proyectos Reales\SoloMotos\backend"
 Si es la primera vez, instalar dependencias Python:
 
 pip install -r requirements.txt
