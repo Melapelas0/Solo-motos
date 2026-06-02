@@ -13,7 +13,6 @@ Iniciar el backend:
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Abrir otra terminal y entrar al directorio del frontend:
 
-cd "c:\Users\ASUS\Pictures\Michael\Proyectos Reales\SoloMotos\frontend"
 Si es la primera vez, instalar dependencias npm:
 
 npm install
