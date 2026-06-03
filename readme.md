@@ -16,7 +16,6 @@ cp .env.example .env
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-cd "c:\Users\ASUS\Pictures\Michael\Proyectos Reales\SoloMotos\frontend"
 Si es la primera vez, instalar dependencias npm:
 
 ```bash
