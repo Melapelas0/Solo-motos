@@ -1,19 +1,30 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from pydantic import BaseModel
 import os
 from ..auth import create_access_token
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+limiter = Limiter(key_func=get_remote_address)
 
 class LoginRequest(BaseModel):
     username: str
     password: str
 
 @router.post("/login")
-async def login(credentials: LoginRequest):
+@limiter.limit("5/minute")
+async def login(request: Request, credentials: LoginRequest):
     # Obtenemos las credenciales correctas desde las variables de entorno
     admin_user = os.getenv("VITE_ADMIN_USER", "admin")
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    
+    # Validar que ADMIN_PASSWORD esté configurada
+    if not admin_password:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error de configuración del servidor",
+        )
     
     # Validamos
     if credentials.username != admin_user or credentials.password != admin_password:

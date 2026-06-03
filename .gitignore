@@ -46,3 +46,12 @@ credentials.json
 *.key
 *.pem
 secrets.json
+
+# MD
+CHANGES_SUMMARY.md
+DEPLOYMENT.md
+PROJECT_STRUCTURE.md
+QUICKSTART.md
+REMEDIATION_REPORT.md
+SECURITY_CHECKLIST.md
+TESTING.md

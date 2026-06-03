@@ -33,10 +33,12 @@ def get_booked_slots(
 @router.get("/", response_model=list[AppointmentResponse])
 def get_appointments(
     db: Session = Depends(get_db), 
-    admin: str = Depends(get_current_admin)
+    admin: str = Depends(get_current_admin),
+    skip: int = Query(0, ge=0, description="Número de registros a saltar"),
+    limit: int = Query(50, ge=1, le=100, description="Máximo de registros a retornar (máximo 100)"),
 ):
-    """Solo el admin puede ver la lista completa de citas"""
-    return db.query(Appointment).all()
+    """Solo el admin puede ver la lista de citas. Soporta paginación."""
+    return db.query(Appointment).offset(skip).limit(limit).all()
 
 
 @router.post("/", response_model=AppointmentResponse)

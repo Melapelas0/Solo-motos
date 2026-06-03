@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -10,9 +10,14 @@ router = APIRouter(prefix="/items", tags=["Items"])
 
 
 @router.get("", response_model=list[ItemResponse]) # Protegida
-def get_items(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
-    """Solo el admin puede ver la lista completa de items"""
-    return db.query(Item).all()
+def get_items(
+    db: Session = Depends(get_db), 
+    admin: str = Depends(get_current_admin),
+    skip: int = Query(0, ge=0, description="Número de registros a saltar"),
+    limit: int = Query(50, ge=1, le=100, description="Máximo de registros a retornar (máximo 100)"),
+):
+    """Solo el admin puede ver la lista de items. Soporta paginación."""
+    return db.query(Item).offset(skip).limit(limit).all()
 
 
 @router.post("", response_model=ItemResponse) # Protegida
