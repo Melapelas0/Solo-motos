@@ -1,20 +1,11 @@
-# 🏍️ SoloMotos - Taller de Motos Management System
+1. Crear un entorno virtual " python -m venv venv "
+2. Activarlo venv\Scripts\activate
+3. Instalar las dependencias necesarias: " pip install fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv pydantic "
+pip install "python-jose[cryptography]" "passlib[bcrypt]"                          
+4. Guardar en requirements " pip freeze > requirements.txt "
+5. Ejecutar " uvicorn app.main:app --reload "
 
-Sistema web para gestión de citas y inventario de un taller de motos.
-
-**Status:** ✅ Listo para producción (después de aplicar SECURITY_CHECKLIST.md)
-
----
-
-## 🚀 Inicio Rápido
-
-### Backend
-
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+Si es la primera vez, instalar dependencias Python:
 
 pip install -r requirements.txt
 
@@ -25,153 +16,14 @@ cp .env.example .env
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Frontend
+cd "c:\Users\ASUS\Pictures\Michael\Proyectos Reales\SoloMotos\frontend"
+Si es la primera vez, instalar dependencias npm:
 
 ```bash
 cd frontend
 npm install
 npm run dev
-```
-
-### URLs
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- Swagger Docs: http://localhost:8000/docs
-
----
-
-## 🔒 ANTES DE DESPLEGAR A PRODUCCIÓN
-
-**⚠️ CRÍTICO:** Leer [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) completamente
-
-Resumen de cambios de seguridad:
-- ✅ JWT Secret sin fallback (requiere .env)
-- ✅ CORS restringido a métodos específicos
-- ✅ Rate limiting en /login
-- ✅ Migrado a PyJWT (de python-jose)
-- ✅ Fallback de localStorage eliminado
-- ⚠️ HTTPS debe configurarse
-- ⚠️ Tokens deben migrar a HttpOnly Cookies
-
-Ver [REMEDIATION_REPORT.md](REMEDIATION_REPORT.md) para detalle técnico completo.
-
----
-
-## 🧪 Testing
-
-```bash
-cd backend
-pip install pytest pytest-asyncio httpx
-pytest tests/ -v
-```
-
-Ver [TESTING.md](TESTING.md) para más detalles.
-
----
-
-## 📁 Estructura
-
-```
-.
-├── backend/
-│   ├── app/
-│   │   ├── main.py           # App FastAPI principal
-│   │   ├── auth.py           # JWT + autenticación
-│   │   ├── database.py       # SQLAlchemy setup
-│   │   ├── models/           # ORM models
-│   │   ├── routers/          # API endpoints
-│   │   └── schemas/          # Pydantic schemas
-│   ├── requirements.txt       # Dependencias Python
-│   └── tests/                # Tests pytest
-├── frontend/
-│   ├── src/
-│   │   ├── pages/            # Rutas React
-│   │   ├── components/       # Componentes reutilizables
-│   │   ├── services/         # API calls
-│   │   └── types/            # TypeScript types
-│   └── package.json          # Dependencias npm
-├── .env.example              # Template de variables
-├── SECURITY_CHECKLIST.md     # Guía de seguridad producción
-├── REMEDIATION_REPORT.md     # Detalles técnicos de fixes
-└── TESTING.md                # Guía de testing
-```
-
----
-
-## 🔧 Configuración Variables de Entorno
-
-Copiar [.env.example](.env.example) a `.env` y configurar:
-
-**Críticas:**
-- `SECRET_KEY` - Generar con: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
-- `ADMIN_PASSWORD` - Contraseña fuerte (mínimo 12 caracteres)
-
-**Producción:**
-- `VITE_API_URL` - URL HTTPS del backend
-- `FRONTEND_URL` - URL HTTPS del frontend
-- `ALLOWED_HOSTS` - Dominios permitidos
-
----
-
-## 📚 Documentación
-
-| Documento | Para... |
-|-----------|---------|
-| [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) | Guía completa de seguridad para producción |
-| [REMEDIATION_REPORT.md](REMEDIATION_REPORT.md) | Detalles de todos los fixes aplicados |
-| [TESTING.md](TESTING.md) | Cómo ejecutar y escribir tests |
-| [.env.example](.env.example) | Template de configuración |
-
----
-
-## 🛠️ Tecnologías
-
-**Backend:**
-- FastAPI 0.104
-- SQLAlchemy 2.0
-- PyJWT (autenticación)
-- slowapi (rate limiting)
-
-**Frontend:**
-- React 18 (TypeScript)
-- Vite
-- Fetch API
-
----
-
-## 📞 API Endpoints
-
-### Autenticación
-- `POST /auth/login` - Login (rate limited 5/min)
-
-### Citas
-- `GET /appointments` - Listar citas (admin)
-- `GET /appointments/booked-slots` - Slots ocupados (público)
-- `POST /appointments` - Crear cita (público)
-- `PUT /appointments/{id}` - Actualizar cita (admin)
-- `DELETE /appointments/{id}` - Eliminar cita (admin)
-
-### Inventario
-- `GET /items` - Listar items (admin)
-- `POST /items` - Crear item (admin)
-- `PUT /items/{id}` - Actualizar item (admin)
-- `DELETE /items/{id}` - Eliminar item (admin)
-
-Ver http://localhost:8000/docs para documentación interactiva.
-
----
-
-## ⚙️ Próximas Mejoras
-
-- [ ] Más tests (>80% coverage)
-- [ ] Dashboard analytics
-- [ ] Reportes PDF
-- [ ] Push notifications
-- [ ] Backup automático
-- [ ] Logs centralizados
-
----
-
-## 📄 Licencia
-
-MIT
+URLs
+Frontend: http://localhost:5173
+Backend: http://localhost:8000
+Documentación Swagger del backend: http://localhost:8000/docs
