@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Wrench, Droplet, Clock, ShieldCheck, ChevronRight, User } from 'lucide-react';
-import heroBg from '../assets/hero_motorcycle.png';
+// Imagen reemplazada por gradiente CSS para evitar dependencia de archivo
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -93,9 +93,8 @@ export const Landing: React.FC = () => {
           display: 'flex', 
           alignItems: 'center', 
           padding: '120px 40px 80px 40px',
-          backgroundImage: `linear-gradient(to right, rgba(10, 11, 14, 0.95) 40%, rgba(10, 11, 14, 0.4) 100%), url(${heroBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          // Gradiente de fondo sin depender de imagen que no existe
+          background: 'linear-gradient(135deg, #0a0b0e 0%, #1a1d2e 50%, #2d1f1a 100%)',
           overflow: 'hidden'
         }}
       >

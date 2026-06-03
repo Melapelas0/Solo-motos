@@ -8,6 +8,12 @@ from fastapi.testclient import TestClient
 from datetime import datetime
 import sys
 import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Cargar .env desde la raíz del proyecto
+env_path = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(env_path)
 
 # Agregar el directorio del backend al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -15,6 +21,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app.main import app
 
 client = TestClient(app)
+
+# Obtener credenciales del .env o usar defaults para tests
+TEST_ADMIN_USER = os.getenv("VITE_ADMIN_USER", "admin")
+TEST_ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "dev_password_123")
 
 
 class TestAuth:
@@ -31,10 +41,10 @@ class TestAuth:
     
     def test_login_valid_credentials(self):
         """POST /auth/login con credenciales válidas debe retornar token"""
-        # Nota: Asume ADMIN_PASSWORD=dev_password_123 en .env de desarrollo
+        # Lee credenciales del .env para poder testear en cualquier entorno
         response = client.post(
             "/auth/login",
-            json={"username": "admin", "password": "dev_password_123"}
+            json={"username": TEST_ADMIN_USER, "password": TEST_ADMIN_PASSWORD}
         )
         assert response.status_code == 200
         assert "access_token" in response.json()
@@ -69,7 +79,7 @@ class TestAppointments:
         """Fixture para obtener un token válido"""
         response = client.post(
             "/auth/login",
-            json={"username": "admin", "password": "dev_password_123"}
+            json={"username": TEST_ADMIN_USER, "password": TEST_ADMIN_PASSWORD}
         )
         return response.json()["access_token"]
     
@@ -139,7 +149,7 @@ class TestInventory:
         """Fixture para obtener un token válido"""
         response = client.post(
             "/auth/login",
-            json={"username": "admin", "password": "dev_password_123"}
+            json={"username": TEST_ADMIN_USER, "password": TEST_ADMIN_PASSWORD}
         )
         return response.json()["access_token"]
     

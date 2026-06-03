@@ -31,10 +31,15 @@ app.add_exception_handler(RateLimitExceeded, lambda req, exc: JSONResponse(
 ))
 
 # Trusted Host Middleware (protege contra Host Header Injection)
-allowed_hosts = ["localhost", "127.0.0.1"]
+# ⚠️ EN PRODUCCIÓN (Railway, Render, Vercel, etc):
+#    Configurar ALLOWED_HOSTS con tu dominio real:
+#    ALLOWED_HOSTS=tuapp.railway.app,tudominio.com
+# Si no lo haces, todas las peticiones serán rechazadas con 400
+allowed_hosts = ["localhost", "127.0.0.1", "*.railway.app", "*.render.com", "*.vercel.app"]
 allowed_hosts_env = os.getenv("ALLOWED_HOSTS", "").strip()
 if allowed_hosts_env:
-    allowed_hosts.extend(allowed_hosts_env.split(","))
+    # Agregar hosts configurados en .env (sobrescribe los defaults)
+    allowed_hosts = allowed_hosts_env.split(",")
 
 app.add_middleware(
     TrustedHostMiddleware,

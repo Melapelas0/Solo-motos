@@ -6,7 +6,9 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  // Recuperamos el token almacenado (asegúrate de usar el mismo nombre al guardarlo en el Login)
+  // ⚠️ DEUDA TÉCNICA: Token en localStorage es vulnerable a XSS
+  // Para producción, migrar a cookies HttpOnly manejadas por el backend
+  // Ver SECURITY_CHECKLIST.md sección 2
   const token = localStorage.getItem('solomotos_token');
 
   const headers: Record<string, string> = {
