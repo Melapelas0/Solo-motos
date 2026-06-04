@@ -47,16 +47,23 @@ app.add_middleware(
 )
 
 # CORS Middleware - Restringido a métodos y headers específicos
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+frontend_url_env = os.getenv("FRONTEND_URL", "")
+if frontend_url_env:
+    origins.extend([url.strip() for url in frontend_url_env.split(",") if url.strip()])
+else:
+    origins.append("http://localhost:5173")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        os.getenv("FRONTEND_URL", "http://localhost:5173")  # Permite configurar en prod
-    ],
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Permite previsualizaciones dinámicas de Vercel
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Métodos específicos, no "*"
-    allow_headers=["Content-Type", "Authorization"],  # Headers específicos, no "*"
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Agregar headers de seguridad
