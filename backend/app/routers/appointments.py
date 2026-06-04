@@ -30,7 +30,7 @@ def get_booked_slots(
     return [row[0] for row in rows]
 
 
-@router.get("/", response_model=list[AppointmentResponse])
+@router.get("", response_model=list[AppointmentResponse])
 def get_appointments(
     db: Session = Depends(get_db), 
     admin: str = Depends(get_current_admin),
@@ -41,7 +41,7 @@ def get_appointments(
     return db.query(Appointment).offset(skip).limit(limit).all()
 
 
-@router.post("/", response_model=AppointmentResponse)
+@router.post("", response_model=AppointmentResponse)
 def create_appointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
     """Esta ruta queda pública para que los clientes agenden"""
     new_appointment = Appointment(**appointment.model_dump())
