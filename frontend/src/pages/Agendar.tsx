@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar, Clock, User, Phone, Tag, Wrench, Droplet, FileText, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { appointmentService } from '../services/appointmentService';
+import { normalizePlate } from '../lib/workshop';
 import { AppointmentCreate } from '../types/appointment';
 
 export const Agendar: React.FC = () => {
@@ -17,17 +18,16 @@ export const Agendar: React.FC = () => {
     time: '',
   });
 
-  const [washType, setWashType] = useState<'sencillo' | 'completo' | 'profundo'>('sencillo');
+  const [washOption, setWashOption] = useState<'solo' | 'desengrasado' | 'desmanchada_motor_campana' | 'quitado_todo' | 'desmanchada_y_quitado' | 'full'>('solo');
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<any>(null);
   const [error, setError] = useState('');
 
-  // Slots de lavadero (intervalos de 45 min)
+  // Slots de lavadero (intervalos de 1 hora)
   const WASH_TIME_SLOTS = [
-    '08:00', '08:45', '09:30', '10:15', '11:00', '11:45',
-    '12:30', '13:15', '14:00', '14:45', '15:30', '16:15',
-    '17:00', '17:45'
+    '08:00', '09:00', '10:00', '11:00', '12:00',
+    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
   ];
 
   // Slots de mecánica (cada hora de 8 AM a 6 PM)
@@ -70,7 +70,7 @@ export const Agendar: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'motorcycle_plate' ? normalizePlate(value) : value,
     }));
   };
 
@@ -95,14 +95,31 @@ export const Agendar: React.FC = () => {
 
     let finalDescription = formData.description;
     if (formData.service_type === 'lavado') {
-      const price = washType === 'sencillo' ? '15.000' : washType === 'completo' ? '20.000' : '35.000';
-      const label = washType === 'sencillo' ? 'Sencillo' : washType === 'completo' ? 'Completo' : 'Profundo';
-      finalDescription = `[Lavado ${label} - $${price} COP] - ${formData.description}`;
+      const priceMap: Record<string, string> = {
+          solo: '15.000',
+          desengrasado: '20.000',
+          desmanchada_motor_campana: '30.000',
+          quitado_todo: '30.000',
+          desmanchada_y_quitado: '40.000',
+          full: '70.000'
+        };
+        const labelMap: Record<string, string> = {
+          solo: 'Solo Lavado',
+          desengrasado: 'Desengrasado de kit de arrastre, motor y brillada',
+          desmanchada_motor_campana: 'Desmanchada de motor y campana',
+          quitado_todo: 'Se le quita todo el vestido y la tapa piñón',
+          desmanchada_y_quitado: 'Desmanchada de motor y se le quita el vestido',
+          full: 'Sin tapas, desmanchada de motor, kit de arrastre, grafiteado chasis, brillada y restauración partes negras'
+        };
+        const price = priceMap[washOption];
+        const label = labelMap[washOption];
+        finalDescription = `[Lavado ${label} - $${price} COP] - ${formData.description}`;
     }
 
     try {
       const result = await appointmentService.create({
         ...formData,
+        motorcycle_plate: normalizePlate(formData.motorcycle_plate),
         description: finalDescription
       });
       setSubmittedData(result);
@@ -268,12 +285,12 @@ export const Agendar: React.FC = () => {
               <label>Selecciona tu Tipo de Lavado</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '8px' }}>
                 
-                {/* Sencillo */}
+                {/* Solo Lavado */}
                 <div 
-                  onClick={() => setWashType('sencillo')}
+                  onClick={() => setWashOption('solo')}
                   style={{
-                    border: washType === 'sencillo' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
-                    backgroundColor: washType === 'sencillo' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    border: washOption === 'solo' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'solo' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
                     borderRadius: 'var(--radius-md)',
                     padding: '16px',
                     textAlign: 'center',
@@ -281,17 +298,16 @@ export const Agendar: React.FC = () => {
                     transition: 'var(--transition-smooth)'
                   }}
                 >
-                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washType === 'sencillo' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Sencillo</h5>
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'solo' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Solo Lavado</h5>
                   <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$15.000 COP</div>
                   <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Champú y secado rápido a presión</p>
                 </div>
-
-                {/* Completo */}
+                {/* Desengrasado */}
                 <div 
-                  onClick={() => setWashType('completo')}
+                  onClick={() => setWashOption('desengrasado')}
                   style={{
-                    border: washType === 'completo' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
-                    backgroundColor: washType === 'completo' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    border: washOption === 'desengrasado' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'desengrasado' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
                     borderRadius: 'var(--radius-md)',
                     padding: '16px',
                     textAlign: 'center',
@@ -299,17 +315,16 @@ export const Agendar: React.FC = () => {
                     transition: 'var(--transition-smooth)'
                   }}
                 >
-                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washType === 'completo' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Completo</h5>
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'desengrasado' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Desengrasado de kit de arrastre, motor y brillada</h5>
                   <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$20.000 COP</div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Detallado + Desengrase + Lubricación</p>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Limpieza profunda de motor y componentes</p>
                 </div>
-
-                {/* Profundo */}
+                {/* Desmanchada Motor y Campana */}
                 <div 
-                  onClick={() => setWashType('profundo')}
+                  onClick={() => setWashOption('desmanchada_motor_campana')}
                   style={{
-                    border: washType === 'profundo' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
-                    backgroundColor: washType === 'profundo' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    border: washOption === 'desmanchada_motor_campana' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'desmanchada_motor_campana' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
                     borderRadius: 'var(--radius-md)',
                     padding: '16px',
                     textAlign: 'center',
@@ -317,11 +332,61 @@ export const Agendar: React.FC = () => {
                     transition: 'var(--transition-smooth)'
                   }}
                 >
-                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washType === 'profundo' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Profundo</h5>
-                  <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$35.000 COP</div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Lava hasta las tapas + Polichado + Silicona</p>
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'desmanchada_motor_campana' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Desmanchada de motor y campana</h5>
+                  <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$30.000 COP</div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Limpieza y desmanchado de motor y campana</p>
                 </div>
-
+                {/* Quitado de todo y tapa piñón */}
+                <div 
+                  onClick={() => setWashOption('quitado_todo')}
+                  style={{
+                    border: washOption === 'quitado_todo' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'quitado_todo' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'var(--transition-smooth)'
+                  }}
+                >
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'quitado_todo' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Se le quita todo el vestido y la tapa piñón</h5>
+                  <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$30.000 COP</div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Desmontaje completo y limpieza exhaustiva</p>
+                </div>
+                {/* Desmanchada y quitado del vestido */}
+                <div 
+                  onClick={() => setWashOption('desmanchada_y_quitado')}
+                  style={{
+                    border: washOption === 'desmanchada_y_quitado' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'desmanchada_y_quitado' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'var(--transition-smooth)'
+                  }}
+                >
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'desmanchada_y_quitado' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Desmanchada de motor y se le quita el vestido</h5>
+                  <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$40.000 COP</div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Limpieza profunda y retiro de vestimenta</p>
+                </div>
+                {/* Full Premium */}
+                <div 
+                  onClick={() => setWashOption('full')}
+                  style={{
+                    border: washOption === 'full' ? '2px solid var(--color-accent)' : '1px solid var(--border-color)',
+                    backgroundColor: washOption === 'full' ? 'rgba(255,122,0,0.04)' : 'rgba(255,255,255,0.01)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'var(--transition-smooth)'
+                  }}
+                >
+                  <h5 style={{ fontWeight: '700', fontSize: '14px', color: washOption === 'full' ? 'var(--color-accent)' : 'var(--text-primary)' }}>Sin tapas, desmanchada de motor, kit de arrastre, grafiteado chasis, brillada y restauración partes negras</h5>
+                  <div style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0', color: 'var(--color-success)' }}>$70.000 COP</div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Servicio premium completo con restauración total</p>
+                </div>
               </div>
             </div>
           )}
@@ -431,7 +496,7 @@ export const Agendar: React.FC = () => {
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={15} />
                 {formData.service_type === 'lavado'
-                  ? 'Selecciona una Hora Disponible (Intervalos de 45 min)'
+                  ? 'Selecciona una Hora Disponible (Intervalos de 1 hora)'
                   : 'Selecciona una Hora Disponible (Cada hora)'}
               </span>
               {!formData.date && (

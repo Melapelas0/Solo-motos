@@ -45,4 +45,10 @@ export const appointmentService = {
       method: 'DELETE',
     });
   },
+  /**
+   * Obtiene el estado de una moto por su placa (público)
+   */
+  getStatusByPlate: async (plate: string): Promise<Appointment> => {
+    return await apiRequest<Appointment>(`/appointments/status/${plate}`);
+  },
 };

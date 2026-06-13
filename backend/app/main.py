@@ -50,12 +50,15 @@ app.add_middleware(
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
 frontend_url_env = os.getenv("FRONTEND_URL", "")
 if frontend_url_env:
     origins.extend([url.strip() for url in frontend_url_env.split(",") if url.strip()])
 else:
     origins.append("http://localhost:5173")
+    origins.append("http://localhost:5174")
 
 app.add_middleware(
     CORSMiddleware,

@@ -79,3 +79,7 @@ export const isValidPlate = (plate: string): boolean => {
   const regex = /^[A-Z]{3}\d{2}[A-Z\d]$/;
   return regex.test(cleanPlate);
 };
+
+export const normalizePlate = (plate: string): string => {
+  return plate.toUpperCase().trim().replace(/[^A-Z0-9]/g, '');
+};

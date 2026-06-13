@@ -10,6 +10,10 @@ from ..schemas.appointment import AppointmentCreate, AppointmentUpdate, Appointm
 router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 
+def normalize_plate(plate: str) -> str:
+    return "".join(ch for ch in plate.upper().strip() if ch.isalnum())
+
+
 @router.get("/booked-slots", response_model=list[str])
 def get_booked_slots(
     date: str = Query(..., description="Fecha en formato YYYY-MM-DD"),
@@ -44,7 +48,9 @@ def get_appointments(
 @router.post("", response_model=AppointmentResponse)
 def create_appointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
     """Esta ruta queda pública para que los clientes agenden"""
-    new_appointment = Appointment(**appointment.model_dump())
+    appointment_data = appointment.model_dump()
+    appointment_data["motorcycle_plate"] = normalize_plate(appointment_data["motorcycle_plate"])
+    new_appointment = Appointment(**appointment_data)
 
     db.add(new_appointment)
     db.commit()
@@ -90,3 +96,18 @@ def delete_appointment(
     db.commit()
 
     return {"message": "Cita eliminada"}
+
+@router.get("/status/{plate}", response_model=AppointmentResponse)
+def get_status_by_plate(plate: str, db: Session = Depends(get_db)):
+    """Obtiene la última cita de una moto por placa."""
+    normalized_plate = normalize_plate(plate)
+    appointment = None
+
+    for candidate in db.query(Appointment).order_by(Appointment.created_at.desc()).all():
+        if normalize_plate(candidate.motorcycle_plate) == normalized_plate:
+            appointment = candidate
+            break
+
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
+    return appointment

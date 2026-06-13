@@ -7,7 +7,8 @@ import {
   Droplet, 
   LogOut, 
   Wrench,
-  User
+  User,
+  History
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -63,6 +64,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           >
             <Droplet size={20} />
             <span>Lavadero</span>
+          </NavLink>
+
+          <NavLink 
+            to="/admin/historial" 
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+          >
+            <History size={20} />
+            <span>Historial</span>
           </NavLink>
         </nav>
 

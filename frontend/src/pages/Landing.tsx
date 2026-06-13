@@ -1,10 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Wrench, Droplet, Clock, ShieldCheck, ChevronRight, User } from 'lucide-react';
+import { Wrench, Droplet, Clock, ShieldCheck, ChevronRight, User, Search } from 'lucide-react';
+import { appointmentService } from '../services/appointmentService';
+import { normalizePlate } from '../lib/workshop';
+import '../styles/modal.css';
 // Imagen reemplazada por gradiente CSS para evitar dependencia de archivo
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [plateInput, setPlateInput] = useState('');
+  const [statusResult, setStatusResult] = useState<any>(null);
+  const [statusError, setStatusError] = useState('');
+  const [statusLoading, setStatusLoading] = useState(false);
+
+  const handleSearch = async () => {
+    const normalizedPlate = normalizePlate(plateInput);
+    if (!normalizedPlate) return;
+    setStatusLoading(true);
+    setStatusError('');
+    setStatusResult(null);
+    try {
+      const result = await appointmentService.getStatusByPlate(normalizedPlate);
+      setStatusResult(result);
+    } catch (err) {
+      setStatusError('No se encontró ninguna cita activa para esa placa.');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0a0b0e' }}>
@@ -152,13 +176,14 @@ export const Landing: React.FC = () => {
               Agendar Cita Ahora
               <ChevronRight size={18} />
             </button>
-            <a 
-              href="#servicios" 
+            <button 
+              onClick={() => setShowStatusModal(true)} 
               className="btn btn-secondary"
-              style={{ padding: '14px 32px', fontSize: '16px' }}
+              style={{ padding: '14px 32px', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              Explorar Servicios
-            </a>
+              <Search size={18} />
+              Consultar Estado
+            </button>
           </div>
         </div>
 
@@ -282,7 +307,7 @@ export const Landing: React.FC = () => {
                   <span style={{ color: 'var(--color-accent)', fontWeight: '700' }}>✓</span> Lavados desde 15,000 COP
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: 'var(--color-accent)', fontWeight: '700' }}>✓</span> Intervalos de 45 minutos sin retrasos
+                  <span style={{ color: 'var(--color-accent)', fontWeight: '700' }}>✓</span> Intervalos de 1 hora sin retrasos
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ color: 'var(--color-accent)', fontWeight: '700' }}>✓</span> Productos biodegradables de calidad
@@ -339,6 +364,131 @@ export const Landing: React.FC = () => {
       >
         <p>© 2026 SoloMotos. Todos los derechos reservados. Diseñado para un rendimiento extremo.</p>
       </footer>
+
+      {/* Modal Consultar Estado por Placa */}
+      {showStatusModal && (
+        <div className="modal-overlay" onClick={() => { setShowStatusModal(false); setStatusResult(null); setStatusError(''); setPlateInput(''); }}>
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'linear-gradient(145deg, #1a1d2e, #12141c)',
+              border: '1px solid rgba(255, 122, 0, 0.15)',
+              color: '#fff',
+              maxWidth: '440px',
+              padding: '32px',
+              borderRadius: '16px'
+            }}
+          >
+            <h3 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '8px', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Consultar Estado de tu Moto
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
+              Ingresa la placa de tu motocicleta para ver el estado de tu servicio.
+            </p>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <input
+                type="text"
+                placeholder="Ej: ABC123"
+                value={plateInput}
+                onChange={e => setPlateInput(normalizePlate(e.target.value))}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  outline: 'none'
+                }}
+              />
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSearch}
+                disabled={statusLoading}
+                style={{ padding: '12px 20px' }}
+              >
+                {statusLoading ? '...' : 'Buscar'}
+              </button>
+            </div>
+
+            {statusError && (
+              <div style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', fontSize: '14px', marginBottom: '12px' }}>
+                {statusError}
+              </div>
+            )}
+
+            {statusResult && (
+              <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ display: 'grid', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Placa</span>
+                    <span style={{ fontWeight: '700', color: 'var(--color-accent)', fontSize: '16px', letterSpacing: '1px' }}>{statusResult.motorcycle_plate?.toUpperCase()}</span>
+                  </div>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.05)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cliente</span>
+                    <span style={{ fontWeight: '600' }}>{statusResult.client_name}</span>
+                  </div>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.05)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Servicio</span>
+                    <span style={{ fontWeight: '600', color: statusResult.service_type === 'mecanica' ? 'var(--color-accent)' : 'var(--color-info)' }}>
+                      {statusResult.service_type === 'mecanica' ? '🔧 Mecánica' : '💧 Lavado'}
+                    </span>
+                  </div>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.05)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Estado</span>
+                    <span style={{
+                      fontWeight: '700',
+                      padding: '4px 12px',
+                      borderRadius: '99px',
+                      fontSize: '13px',
+                      backgroundColor: statusResult.status === 'completado' ? 'rgba(16,185,129,0.15)' : statusResult.status === 'en_progreso' ? 'rgba(59,130,246,0.15)' : 'rgba(255,122,0,0.15)',
+                      color: statusResult.status === 'completado' ? '#34d399' : statusResult.status === 'en_progreso' ? '#60a5fa' : '#ff7a00'
+                    }}>
+                      {statusResult.status === 'completado' ? '✅ Completado' : statusResult.status === 'en_progreso' ? '🔄 En Progreso' : statusResult.status === 'pendiente' ? '⏳ Pendiente' : statusResult.status}
+                    </span>
+                  </div>
+                  {statusResult.date && (
+                    <>
+                      <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.05)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Fecha</span>
+                        <span style={{ fontWeight: '600' }}>{statusResult.date}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => { setShowStatusModal(false); setStatusResult(null); setStatusError(''); setPlateInput(''); }}
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: 'transparent',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: '14px',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { Dashboard } from './pages/admin/Dashboard';
 import { Inventario } from './pages/admin/Inventario';
 import { Citas } from './pages/admin/Citas';
 import { Lavadero } from './pages/admin/Lavadero';
+import { Historial } from './pages/admin/Historial';
 
 // Componente para Proteger Rutas Administrativas
 interface ProtectedRouteProps {
@@ -69,6 +70,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Lavadero />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/historial" 
+          element={
+            <ProtectedRoute>
+              <Historial />
             </ProtectedRoute>
           } 
         />

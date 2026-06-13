@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { appointmentService } from '../../services/appointmentService';
 import { Link } from 'react-router-dom';
-import { 
-  ClipboardList, 
-  Droplet, 
-  Warehouse, 
-  Wrench, 
-  TrendingUp, 
+import {
+  ClipboardList,
+  Droplet,
+  Warehouse,
+  Wrench,
+  TrendingUp,
   AlertTriangle,
   Clock,
   ArrowUpRight
 } from 'lucide-react';
-import { appointmentService } from '../../services/appointmentService';
+
 import { inventoryService } from '../../services/inventoryService';
 import { Appointment } from '../../types/appointment';
 import { Item } from '../../types/item';
 import { getStatusLabel, getStatusBadgeClass } from '../../lib/workshop';
 
 export const Dashboard: React.FC = () => {
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [inventory, setInventory] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +50,10 @@ export const Dashboard: React.FC = () => {
   // Filtrar citas de hoy
   const todayStr = new Date().toISOString().split('T')[0];
   const citasHoy = appointments.filter(a => a.date === todayStr);
+
+  // Capacidades máximas actualizadas
+  const MAX_MECANICA = 6;
+  const MAX_LAVADERO = 10;
 
   return (
     <div>
@@ -173,22 +179,22 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Lado derecho: Widgets Rápidos de Alertas y Estadísticas */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           {/* Alertas de Stock */}
           <div className="card" style={{ flex: 1 }}>
-            <div className="card-title" style={{ fontSize: '18px' }}>
-              <Warehouse size={18} style={{ color: 'var(--color-danger)' }} />
+            <div className="card-title" style={{ fontSize: "18px" }}>
+              <Warehouse size={18} style={{ color: "var(--color-danger)" }} />
               <span>Alertas de Inventario</span>
             </div>
 
             {loading ? (
-              <p style={{ color: 'var(--text-secondary)' }}>Cargando...</p>
+              <p style={{ color: "var(--text-secondary)" }}>Cargando...</p>
             ) : inventory.filter(i => i.current_stock <= (i.max_stock * 0.2)).length === 0 ? (
-              <p style={{ color: 'var(--color-success)', fontSize: '14px', fontWeight: '500' }}>
+              <p style={{ color: "var(--color-success)", fontSize: "14px", fontWeight: "500" }}>
                 ✓ Todos los repuestos tienen stock suficiente.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {inventory
                   .filter(item => item.current_stock <= (item.max_stock * 0.2))
                   .slice(0, 4)
@@ -196,70 +202,70 @@ export const Dashboard: React.FC = () => {
                     <div 
                       key={item.id}
                       style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        padding: '12px', 
-                        backgroundColor: 'rgba(255,255,255,0.01)', 
-                        border: '1px solid var(--border-color)', 
-                        borderRadius: 'var(--radius-sm)'
+                        display: "flex", 
+                        justifyContent: "space-between", 
+                        alignItems: "center", 
+                        padding: "12px", 
+                        backgroundColor: "rgba(255,255,255,0.01)", 
+                        border: "1px solid var(--border-color)", 
+                        borderRadius: "var(--radius-sm)"
                       }}
                     >
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: '600' }}>{item.name}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Categoría: {item.category}</div>
+                        <div style={{ fontSize: "14px", fontWeight: "600" }}>{item.name}</div>
+                        <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Categoría: {item.category}</div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-danger)' }}>
+                      <div style={{ textAlign: "right" }}>
+                        <span style={{ fontSize: "14px", fontWeight: "800", color: "var(--color-danger)" }}>
                           {item.current_stock}
                         </span>
-                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}> / {item.max_stock} {item.unit}</span>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}> / {item.max_stock} {item.unit}</span>
                       </div>
                     </div>
                   ))}
-              </div>
-            )}
+            </div>
+          )}
           </div>
 
           {/* Gráfico Rápido de Capacidad de Servicios */}
           <div className="card">
-            <div className="card-title" style={{ fontSize: '18px' }}>
-              <ClipboardList size={18} style={{ color: 'var(--color-accent)' }} />
-              <span>Capacidad Diaria</span>
-            </div>
-            
-            <div style={{ marginTop: '8px' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Mecánica (Max 5/día)</span>
-                  <span style={{ fontWeight: '600' }}>{appointments.filter(a => a.service_type === 'mecanica' && a.date === todayStr).length} / 5</span>
+              <div className="card-title" style={{ fontSize: "18px" }}>
+                <ClipboardList size={18} style={{ color: "var(--color-accent)" }} />
+                <span>Capacidad Diaria</span>
+              </div>
+
+            <div style={{ marginTop: "8px" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "6px" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Mecánica (Max {MAX_MECANICA}/día)</span>
+                  <span style={{ fontWeight: "600" }}>{appointments.filter(a => a.service_type === 'mecanica' && a.date === todayStr).length} / {MAX_MECANICA}</span>
                 </div>
-                <div style={{ height: '8px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: "8px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "4px", overflow: "hidden" }}>
                   <div 
                     style={{ 
-                      height: '100%', 
-                      background: 'var(--accent-gradient)',
-                      width: `${Math.min((appointments.filter(a => a.service_type === 'mecanica' && a.date === todayStr).length / 5) * 100, 100)}%`,
-                      borderRadius: '4px',
-                      transition: 'var(--transition-smooth)'
+                      height: "100%",
+                      background: "var(--accent-gradient)",
+                      width: `${Math.min((appointments.filter(a => a.service_type === 'mecanica' && a.date === todayStr).length / MAX_MECANICA) * 100, 100)}%`,
+                      borderRadius: "4px",
+                      transition: "var(--transition-smooth)"
                     }}
                   />
                 </div>
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Lavadero (Max 8/día)</span>
-                  <span style={{ fontWeight: '600' }}>{appointments.filter(a => a.service_type === 'lavado' && a.date === todayStr).length} / 8</span>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "6px" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Lavadero (Max {MAX_LAVADERO}/día)</span>
+                  <span style={{ fontWeight: "600" }}>{appointments.filter(a => a.service_type === 'lavado' && a.date === todayStr).length} / {MAX_LAVADERO}</span>
                 </div>
-                <div style={{ height: '8px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: "8px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "4px", overflow: "hidden" }}>
                   <div 
                     style={{ 
-                      height: '100%', 
-                      backgroundColor: 'var(--color-info)',
-                      width: `${Math.min((appointments.filter(a => a.service_type === 'lavado' && a.date === todayStr).length / 8) * 100, 100)}%`,
-                      borderRadius: '4px',
-                      transition: 'var(--transition-smooth)'
+                      height: "100%",
+                      backgroundColor: "var(--color-info)",
+                      width: `${Math.min((appointments.filter(a => a.service_type === 'lavado' && a.date === todayStr).length / MAX_LAVADERO) * 100, 100)}%`,
+                      borderRadius: "4px",
+                      transition: "var(--transition-smooth)"
                     }}
                   />
                 </div>
