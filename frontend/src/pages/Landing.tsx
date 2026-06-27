@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Wrench, Droplet, Clock, ShieldCheck, ChevronRight, User, Search } from 'lucide-react';
 import { appointmentService } from '../services/appointmentService';
 import { normalizePlate } from '../lib/workshop';
-import '../styles/modal.css';
 // Imagen reemplazada por gradiente CSS para evitar dependencia de archivo
 
 export const Landing: React.FC = () => {
